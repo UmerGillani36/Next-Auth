@@ -1,5 +1,21 @@
 import { useRef, useState } from 'react';
+import { signIn } from 'next-auth/react';
 import classes from './auth-form.module.css';
+
+async function createUser(email, password) {
+  const response = await fetch('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Something went wrong');
+  }
+  return data;
+}
 
 function AuthForm() {
   const emailInputRef = useRef();
@@ -11,10 +27,30 @@ function AuthForm() {
     setIsLogin((prevState) => !prevState);
   }
 
+  async function submitHandler(e) {
+    e.preventDefault();
+    const email = emailInputRef.current.value;
+    const password = passwordInputRef.current.value;
+    if (isLogin) {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+      console.log('result', result);
+    } else {
+      try {
+        const data = await createUser(email, password);
+        console.log(data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
   return (
     <section className={classes.auth}>
       <h1>{isLogin ? 'Login' : 'Sign Up'}</h1>
-      <form>
+      <form onSubmit={submitHandler}>
         <div className={classes.control}>
           <label htmlFor="email">Your Email</label>
           <input type="email" id="email" required ref={emailInputRef} />
