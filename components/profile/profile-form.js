@@ -6,8 +6,15 @@ function ProfileForm(props) {
   const oldPasswordRef = useRef();
   const newPasswordRef = useRef();
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const oldPassword = oldPasswordRef.current.value;
+    const newPassword = newPasswordRef.current.value;
+
+    props.changePasswordHandler({ oldPassword, newPassword });
+  };
   return (
-    <form className={classes.form}>
+    <form className={classes.form} onSubmit={handleSubmit}>
       <div className={classes.control}>
         <label htmlFor="new-password">New Password</label>
         <input type="password" id="new-password" ref={newPasswordRef} />
